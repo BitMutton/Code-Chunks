@@ -1,1 +1,41 @@
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# IDE/editor settings
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Environment files (in case you add any config later)
+.env
+*.env
+
+# SSH keys or sensitive credentials
+githubssh*
+*.key
+*.pem
+
+# Dependency directories (if you later use npm/composer)
+node_modules/
+vendor/
+
+# Cache and temporary files
+*.cache
+*.tmp
+
+# System files
+*.swp
+*.bak
+
+# Optional: exclude large raw image folders if needed
+# assets/raw_images/
+
+# Optional: exclude compiled files (if any)
+*.class
+*.pyc
+*.o
+*.so
 githubssh*
