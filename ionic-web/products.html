@@ -1,0 +1,96 @@
+<!-- public/products.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Products</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Ionic Core -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core@7.6.0/dist/ionic/ionic.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core@7.6.0/dist/ionic/ionic.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core@7.6.0/css/ionic.bundle.css" />
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    ion-card {
+      margin: 16px;
+    }
+    img.product-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <ion-app>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Products</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <ion-list id="product-list">
+        <!-- Product cards go here -->
+      </ion-list>
+    </ion-content>
+
+    <ion-footer>
+      <ion-toolbar>
+        <ion-title size="small">© 2025 My Company</ion-title>
+      </ion-toolbar>
+    </ion-footer>
+  </ion-app>
+
+  <script>
+    const API_URL = 'http://localhost:8000/api/products'; // ✅ Update if hosted elsewhere
+
+    async function loadProducts() {
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+
+      try {
+        const response = await axios.get(API_URL);
+        const products = response.data;
+
+        products.forEach(product => {
+          const card = document.createElement('ion-card');
+
+          if (product.image) {
+            const img = document.createElement('img');
+            img.src = product.image;
+            img.alt = product.name;
+            img.className = 'product-img';
+            card.appendChild(img);
+          }
+
+          const header = document.createElement('ion-card-header');
+          const title = document.createElement('ion-card-title');
+          title.textContent = product.name;
+          header.appendChild(title);
+          card.appendChild(header);
+
+          const content = document.createElement('ion-card-content');
+          content.innerHTML = `
+            <p>${product.description || ''}</p>
+            <p><strong>Price:</strong> $${product.price}</p>
+          `;
+          card.appendChild(content);
+
+          list.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Failed to load products:', err);
+        list.innerHTML = '<ion-item><ion-label color="danger">Failed to load products.</ion-label></ion-item>';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>
+

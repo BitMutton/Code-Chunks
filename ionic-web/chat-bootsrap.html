@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chat Assistant</title>
+
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- Markdown renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .chat-bubble {
+      padding: 10px 16px;
+      border-radius: 18px;
+      max-width: 75%;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .chat-user {
+      background-color: #0d6efd;
+      color: white;
+      align-self: flex-end;
+    }
+    .chat-assistant {
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #dee2e6;
+    }
+    .chat-container {
+      height: calc(100vh - 150px);
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="bg-primary text-white p-3 shadow">
+    <div class="container">
+      <h1 class="h5 mb-0">💬 AI Chat Assistant</h1>
+    </div>
+  </header>
+
+  <main class="container py-3">
+    <div id="chatBox" class="chat-container border rounded bg-white"></div>
+  </main>
+
+  <footer class="bg-white border-top py-3">
+    <div class="container d-flex gap-2">
+      <input type="text" id="userInput" class="form-control" placeholder="Type your message..." />
+      <button id="sendBtn" class="btn btn-primary">Send</button>
+      <button id="stopBtn" class="btn btn-danger d-none">Stop</button>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS (Optional, not needed for this page) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chat Logic -->
+  <script>
+    const chatBox = document.getElementById('chatBox')
+    const userInput = document.getElementById('userInput')
+    const sendBtn = document.getElementById('sendBtn')
+    const stopBtn = document.getElementById('stopBtn')
+    let controller = null
+
+    function appendMessage(text, role) {
+      const wrapper = document.createElement('div')
+      wrapper.className = 'd-flex ' + (role === 'user' ? 'justify-content-end' : 'justify-content-start')
+
+      const bubble = document.createElement('div')
+      bubble.className = 'chat-bubble ' + (role === 'user' ? 'chat-user' : 'chat-assistant')
+      bubble.innerHTML = role === 'assistant' ? marked.parse(text) : text
+
+      wrapper.appendChild(bubble)
+      chatBox.appendChild(wrapper)
+      chatBox.scrollTop = chatBox.scrollHeight
+    }
+
+    async function sendMessage() {
+      const message = userInput.value.trim()
+      if (!message) return
+
+      appendMessage(message, 'user')
+      userInput.value = ''
+      sendBtn.disabled = true
+      stopBtn.classList.remove('d-none')
+
+      controller = new AbortController()
+
+      try {
+        const res = await fetch('http://localhost:8000/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+          signal: controller.signal
+        })
+
+        const reader = res.body.getReader()
+        let fullMessage = ''
+        const wrapper = document.createElement('div')
+        wrapper.className = 'd-flex justify-content-start'
+        const bubble = document.createElement('div')
+        bubble.className = 'chat-bubble chat-assistant'
+        wrapper.appendChild(bubble)
+        chatBox.appendChild(wrapper)
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = new TextDecoder().decode(value).split('\n')
+          for (let line of chunk) {
+            line = line.trim()
+            if (!line) continue
+            try {
+              const json = JSON.parse(line)
+              if (json.message?.content) {
+                fullMessage += json.message.content
+                bubble.innerHTML = marked.parse(fullMessage)
+                chatBox.scrollTop = chatBox.scrollHeight
+              }
+            } catch (e) {
+              console.warn('Parse error:', line)
+            }
+          }
+        }
+      } catch (e) {
+        appendMessage('❌ Error or aborted request.', 'assistant')
+      } finally {
+        sendBtn.disabled = false
+        stopBtn.classList.add('d-none')
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage)
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage()
+    })
+
+    stopBtn.addEventListener('click', () => {
+      if (controller) controller.abort()
+      stopBtn.classList.add('d-none')
+      sendBtn.disabled = false
+    })
+  </script>
+</body>
+</html>
+

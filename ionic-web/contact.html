@@ -1,0 +1,56 @@
+<!-- standalone.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contact Us</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Ionic Core CDN -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core@latest/dist/ionic/ionic.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core@latest/dist/ionic/ionic.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core@latest/css/ionic.bundle.css" />
+  </head>
+
+  <body>
+    <ion-app>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Contact Us</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="floating">Name</ion-label>
+          <ion-input type="text"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Message</ion-label>
+          <ion-textarea></ion-textarea>
+        </ion-item>
+
+        <ion-button expand="block" onclick="submitForm()">Send</ion-button>
+      </ion-content>
+
+      <ion-footer>
+        <ion-toolbar>
+          <ion-title size="small">© 2025 My Company</ion-title>
+        </ion-toolbar>
+      </ion-footer>
+    </ion-app>
+
+    <script>
+      function submitForm() {
+        alert("Form submitted!");
+      }
+    </script>
+  </body>
+</html>
+
